@@ -9,9 +9,21 @@ MCP server for Gemini Deep Research Agent.
 
 == Installation
 
+From the repository directory:
+
 [source,bash]
 ----
-uv tool install file:///path/to/deep-research-gemini
+cd /path/to/deep-research-gemini
+uv tool install .
+----
+
+To update after making changes:
+
+[source,bash]
+----
+uv cache clean --force
+uv tool uninstall deep-research-gemini
+uv tool install .
 ----
 
 == MCP Configuration

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import os
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -54,7 +56,7 @@ def _save_report(content: str, report_name: str) -> Path:
     return filepath
 
 
-mcp = FastMCP("deep-research-gemini")
+mcp = FastMCP("deep-research-gemini", log_level="WARNING")
 
 
 @mcp.tool()
@@ -79,8 +81,12 @@ def deep_research(query: str, report_name: str) -> str:
     return f"Report generated: {filepath}"
 
 
-def main():
+def main() -> None:
     global _format_instructions, _report_dir
+
+    # Quiet noisy MCP INFO logs like "Processing request of type ..."
+    logging.getLogger("mcp").setLevel(logging.WARNING)
+    logging.getLogger("mcp.server.lowlevel.server").setLevel(logging.WARNING)
 
     parser = argparse.ArgumentParser(description="MCP server for Gemini Deep Research")
     parser.add_argument(
