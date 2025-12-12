@@ -1,0 +1,52 @@
+= deep-research-gemini
+
+MCP server for Gemini Deep Research Agent.
+
+== Requirements
+
+* `uv` (for installation)
+* `GEMINI_API_KEY` environment variable
+
+== Installation
+
+[source,bash]
+----
+uv tool install file:///path/to/deep-research-gemini
+----
+
+== MCP Configuration
+
+Add to your `opencode.jsonc` (or equivalent):
+
+[source,jsonc]
+----
+"mcp": {
+  "deep-research": {
+    "type": "local",
+    "enabled": true,
+    "command": ["deep-research-gemini", "--report-dir", "./transient/"]
+  }
+}
+----
+
+Optional: Add `--format-instructions` to append formatting rules to every query:
+
+[source,jsonc]
+----
+"command": [
+  "deep-research-gemini",
+  "--report-dir", "./transient/",
+  "--format-instructions", "./format-instructions.txt"
+]
+----
+
+== Tool
+
+`deep_research(query, report_name)`
+
+* `query` - The research question or task
+* `report_name` - Slug for the output filename (e.g., `ev-battery-landscape`)
+
+Returns path to generated report: `Report generated: ./transient/20251212143022-ev-battery-landscape.txt`
+
+Research typically takes several minutes.
