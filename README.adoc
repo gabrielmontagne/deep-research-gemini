@@ -1,6 +1,6 @@
 = deep-research-gemini
 
-MCP server for Gemini Deep Research Agent.
+Thin wrapper MCP server for Gemini Deep Research Agent.
 
 == Requirements
 
