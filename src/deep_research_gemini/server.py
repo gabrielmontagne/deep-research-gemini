@@ -7,6 +7,7 @@ import logging
 import os
 import sys
 import time
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -24,6 +25,12 @@ def _run_research(query: str) -> str:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is required")
+
+    warnings.filterwarnings(
+        "ignore",
+        message=".*Interactions usage is experimental.*",
+        category=UserWarning,
+    )
 
     client = genai.Client(api_key=api_key)
 
@@ -88,7 +95,7 @@ def main() -> None:
     logging.getLogger("mcp").setLevel(logging.WARNING)
     logging.getLogger("mcp.server.lowlevel.server").setLevel(logging.WARNING)
 
-    parser = argparse.ArgumentParser(description="MCP server for Gemini Deep Research")
+    parser = argparse.ArgumentParser(description="Gemini Deep Research CLI and MCP server")
     parser.add_argument(
         "--format-instructions",
         type=Path,
@@ -99,6 +106,11 @@ def main() -> None:
         type=Path,
         default=Path("./transient"),
         help="Directory to save reports (default: ./transient/)",
+    )
+    parser.add_argument(
+        "--mcp",
+        action="store_true",
+        help="Run as an MCP server instead of CLI filter mode",
     )
     args = parser.parse_args()
 
@@ -112,7 +124,17 @@ def main() -> None:
 
     _report_dir = args.report_dir
 
-    mcp.run()
+    if args.mcp:
+        mcp.run()
+        return
+
+    query = sys.stdin.read().strip()
+    if not query:
+        parser.error("requires a query on stdin; use --mcp for MCP server mode")
+    report_text = _run_research(query)
+    sys.stdout.write(report_text)
+    if not report_text.endswith("\n"):
+        sys.stdout.write("\n")
 
 
 if __name__ == "__main__":

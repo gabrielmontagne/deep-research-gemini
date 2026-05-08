@@ -1,6 +1,6 @@
 = deep-research-gemini
 
-Thin wrapper MCP server for Gemini Deep Research Agent.
+Thin CLI and MCP wrapper for Gemini Deep Research Agent.
 
 == Requirements
 
@@ -36,7 +36,7 @@ Add to your `opencode.jsonc` (or equivalent):
   "deep-research": {
     "type": "local",
     "enabled": true,
-    "command": ["deep-research-gemini", "--report-dir", "./transient/"]
+    "command": ["deep-research-gemini", "--mcp", "--report-dir", "./transient/"]
   }
 }
 ----
@@ -47,12 +47,24 @@ Optional: Add `--format-instructions` to append formatting rules to every query:
 ----
 "command": [
   "deep-research-gemini",
+  "--mcp",
   "--report-dir", "./transient/",
   "--format-instructions", "./format-instructions.txt"
 ]
 ----
 
-== Tool
+== CLI filter mode
+
+Pipe a query on stdin and print the final report text to stdout:
+
+[source,bash]
+----
+deep-research-gemini < query.md > report.md
+----
+
+This waits in the foreground. The successful report body is written to stdout.
+
+== MCP Tool
 
 `deep_research(query, report_name)`
 
