@@ -20,6 +20,27 @@ _format_instructions: Optional[str] = None
 _report_dir: Path = Path("./transient")
 
 
+def _extract_report_text(interaction) -> str:
+    """Extract final report text from google-genai interaction shapes."""
+    # google-genai < 2 exposed final text as interaction.outputs[-1].text.
+    outputs = getattr(interaction, "outputs", None)
+    if outputs:
+        text = getattr(outputs[-1], "text", None)
+        if text:
+            return text
+
+    # google-genai >= 2 exposes final text as the last model_output step.
+    for step in reversed(getattr(interaction, "steps", None) or []):
+        if getattr(step, "type", None) != "model_output":
+            continue
+        texts = [getattr(item, "text", "") for item in (getattr(step, "content", None) or [])]
+        report_text = "\n".join(text for text in texts if text)
+        if report_text:
+            return report_text
+
+    raise RuntimeError(f"Research completed but no report text was found: {interaction!r}")
+
+
 def _run_research(query: str) -> str:
     """Execute deep research and return the report text."""
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -47,7 +68,7 @@ def _run_research(query: str) -> str:
     while True:
         interaction = client.interactions.get(interaction.id)
         if interaction.status == "completed":
-            return interaction.outputs[-1].text
+            return _extract_report_text(interaction)
         elif interaction.status == "failed":
             raise RuntimeError(f"Research failed: {interaction.error}")
         time.sleep(10)
